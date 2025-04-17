@@ -1,0 +1,58 @@
+#SPDX-License-Identifier: MIT-0
+---
+
+    - name: Mettre à jour les paquets
+      dnf:
+        name: '*'
+        state: latest
+        update_cache: yes
+
+    - name: Installation des paquets
+      dnf:
+        name:
+          - git
+          - procps-ng
+        state: present
+
+    - name: Télécharger le script d'installation Node.js 23
+      get_url:
+        url: https://rpm.nodesource.com/setup_23.x
+        dest: /tmp/setup_node.sh
+        mode: '0755'
+
+    - name: Exécuter le script Node.js
+      command: bash /tmp/setup_node.sh
+
+    - name: Installer Node.js
+      dnf:
+        name: nodejs
+        state: present
+
+    - name: Cloner le dépôt de l'application
+      git:
+        repo: https://github.com/franklin-tutorials/quiz-ansible.git
+        dest: "{{ app_dir }}"
+        version: HEAD
+
+    - name: Installer les dépendances npm
+      command: npm install
+      args:
+        chdir: "{{ app_dir }}"
+    
+    - name: Compiler l'application (build)
+      command: npm run build
+      args:
+        chdir: "{{ app_dir }}"
+    
+    - name: Installer le serveur statique "serve"
+      npm:
+        name: serve
+        global: yes
+        state: present
+
+    - name: Lancer l'application avec "serve"
+      shell: serve -s dist -l {{ serve_port }} -n
+      args:
+        chdir: "{{ app_dir }}"
+      async: 3600
+      poll: 0
