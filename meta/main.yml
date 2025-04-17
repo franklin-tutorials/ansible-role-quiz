@@ -18,5 +18,7 @@ galaxy_info:
     - quiz
     - application
     - rocky
+  
+  repository: https://github.com/franklin-tutorials/role-ansible-quiz.git
 
 dependencies: []
